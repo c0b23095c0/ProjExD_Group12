@@ -180,11 +180,11 @@ class Enemy:
         
 
 class ClearObj:
-    def __init__(self):
+    def __init__(self, x:int, y:int):
         self.img = pg.transform.rotozoom(pg.image.load(f"glayringo.png"), 0, 0.1)
         self.rct = self.img.get_rect()
-        self.rct.right = WIDTH
-        self.rct.bottom = HEIGHT
+        self.rct.right = x
+        self.rct.bottom = y
         
     def update(self, screen: pg.Surface):
         screen.blit(self.img, self.rct)
@@ -197,7 +197,7 @@ def main():
 
     gravity_manager = Gravity()
     bird = Bird((300, 200), gravity_manager)
-    cringo = ClearObj()
+    cringo = ClearObj(WIDTH, HEIGHT)
     isgravity = 0
     enemies1 = [
         Enemy(400, 15, 2),
