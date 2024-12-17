@@ -156,10 +156,10 @@ class Enemy:
     """
     def __init__(self, x:int, y:int, speed):
         """
-        火の玉の読み込みと初期速度
+        りんごの読み込みと初期速度
         """
         self.vy = speed
-        self.img = pg.transform.rotozoom(pg.image.load(f"fireball.png"), 0, 0.01)
+        self.img = pg.transform.rotozoom(pg.image.load(f"ringo.png"), 0, 0.05)
         self.rct = self.img.get_rect()
         self.rct.center = (x, y)
         self.rct.top = y
@@ -168,7 +168,7 @@ class Enemy:
 
     def update(self, screen: pg.Surface):
         """
-        火の玉を速度ベクトルself.vyに基づき移動させる
+        りんごを速度ベクトルself.vyに基づき移動させる
         引数 screen：画面Surface
         """
         if self.rct.bottom >= HEIGHT:
@@ -179,6 +179,16 @@ class Enemy:
         screen.blit(self.img, self.rct)
         
 
+class ClearObj:
+    def __init__(self):
+        self.img = pg.transform.rotozoom(pg.image.load(f"glayringo.png"), 0, 0.1)
+        self.rct = self.img.get_rect()
+        self.rct.right = WIDTH
+        self.rct.bottom = HEIGHT
+        
+    def update(self, screen: pg.Surface):
+        screen.blit(self.img, self.rct)
+
 
 def main():
     pg.display.set_caption("グラビティだよ！こうかとん")
@@ -187,7 +197,8 @@ def main():
 
     gravity_manager = Gravity()
     bird = Bird((300, 200), gravity_manager)
-
+    cringo = ClearObj()
+    isgravity = 0
     enemies1 = [
         Enemy(400, 15, 2),
         Enemy(400, 138, 2),
@@ -217,6 +228,8 @@ def main():
                 #ジャンプの処理
                 if bird.rct.bottom >= HEIGHT:  # 地面にいるときだけジャンプ
                     bird.vy = gravity_manager.jump()
+            if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
+                isgravity = 1 - isgravity
         screen.blit(bg_img, [0, 0])
             
 
@@ -227,6 +240,7 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+            
         for enemy in enemies2:
             if bird.rct.colliderect(enemy.rct):
                 # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -234,10 +248,17 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+            
+        if bird.rct.colliderect(cringo.rct):
+                bird.change_img(6, screen)
+                pg.display.update()
+                time.sleep(1)
+                return
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         #enemy1.update(screen)
+        cringo.update(screen)
         
         for enemy in enemies1:
             enemy.update(screen)
