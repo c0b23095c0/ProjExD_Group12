@@ -150,6 +150,15 @@ class Explosion:
             screen.blit(self.img, self.img_rct)
 
 
+class Enemy:
+    """
+    こうかとんをこの世から消し去るためステージに置かれるギミックのクラス
+    """
+    def __init__(self, gravity_manager: Gravity):
+        #こうかとんが触れると死んでしまう弾を降らす
+        pass
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
