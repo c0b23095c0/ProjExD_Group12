@@ -53,6 +53,14 @@ class Gravity:
         戻り値:ジャンプの初速度
         """
         return self.jump_power
+    
+    def reverse_gravity(self, bird):
+        """
+        重力を反転させる
+        """
+        self.gravity = -self.gravity
+        self.jump_power = -1 * self.jump_power
+        bird.flip_v()
 
 
 class Bird:
@@ -82,6 +90,8 @@ class Bird:
         self.dire = (+3, 0)
         self.vy = 0
         self.gravity_maneger = gravity_manager
+        self.reversing = False
+        self.g_switch =False
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -90,6 +100,7 @@ class Bird:
         引数2 screen：画面Surface
         """
         self.img = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 0.9)
+
         screen.blit(self.img, self.rct)
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
@@ -111,17 +122,39 @@ class Bird:
         self.vy = self.gravity_maneger.apply_gravity(self.vy)
         self.rct.centery += self.vy
 
-        # 地面判定
-        if self.rct.bottom >= HEIGHT:
-            self.rct.bottom = HEIGHT
-            self.vy = 0
+        # 地面・天井判定
+        if self.gravity_maneger.gravity > 0:
+            # 地面判定
+            if self.rct.bottom >= HEIGHT:
+                self.rct.bottom = HEIGHT
+                self.vy = 0
+               
+        # 天井判定
+        else:
+            if self.rct.top <= 0:
+                self.rct.top = 0
+                self.vy = 0 
 
         # 横方向の向きを更新
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.img = __class__.imgs[tuple(sum_mv)]
-            self.dire = sum_mv
+            # print("self reverse", self.reversing)
+            if  self.g_switch:
+                self.img = pg.transform.flip(self.img, False, True)
+                print("w")
 
+            self.dire = sum_mv
+        
+        if self.reversing:
+            self.img = pg.transform.flip(self.img, False, True)
+            self.flip_v()
         screen.blit(self.img, self.rct)
+    
+    def flip_v(self):
+        """
+        こうかとん描写の上下反転
+        """
+        self.reversing = not self.reversing
 
 
 class Explosion:
@@ -170,8 +203,12 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 #ジャンプの処理
-                if bird.rct.bottom >= HEIGHT:  # 地面にいるときだけジャンプ
+                if bird.rct.bottom >= HEIGHT or bird.rct.top <= 0:  # 地面にいるときだけジャンプ
                     bird.vy = gravity_manager.jump()
+                
+            if event.type == pg.KEYDOWN and event.key == pg.K_g:
+                gravity_manager.reverse_gravity(bird)
+                bird.g_switch = not bird.g_switch
         screen.blit(bg_img, [0, 0])
             
         key_lst = pg.key.get_pressed()
