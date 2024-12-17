@@ -138,10 +138,8 @@ class Bird:
         # 横方向の向きを更新
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.img = __class__.imgs[tuple(sum_mv)]
-            # print("self reverse", self.reversing)
             if  self.g_switch:
                 self.img = pg.transform.flip(self.img, False, True)
-                print("w")
 
             self.dire = sum_mv
         
