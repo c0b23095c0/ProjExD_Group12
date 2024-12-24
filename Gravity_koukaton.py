@@ -38,6 +38,7 @@ class Gravity:
         """
         self.gravity = gravity
         self.jump_power = jump_power
+        self.flag = False
 
     def apply_gravity(self, vy: float) -> float:
         """
@@ -54,7 +55,7 @@ class Gravity:
         """
         return self.jump_power
     
-    def reverse_gravity(self, bird):
+    def reverse_gravity(self, bird: "Bird"):
         """
         重力を反転させる
         """
@@ -78,7 +79,7 @@ class Bird:
             (-3, 0): img0,  # 左
         }
 
-    def __init__(self, xy: tuple[int, int], gravity_manager: Gravity):
+    def __init__(self, xy: tuple[int, int], gravity_manager: "Gravity"):
         """
         こうかとん画像Surfaceを生成する
         引数 xy：こうかとん画像の初期位置座標タプル
@@ -128,6 +129,7 @@ class Bird:
             if self.rct.bottom >= HEIGHT:
                 self.rct.bottom = HEIGHT
                 self.vy = 0
+                self.gravity_maneger.flag = False
                
         # 天井判定
         else:
@@ -247,16 +249,16 @@ class Stege:
         """
         bird_hit_stage = False
         for rect in self.image:
-            if bird.gravity_maneger.gravity > 0:  # 通常の重力（下向き）
+            if bird.g_switch == False:  # 通常の重力（下向き）
                 if bird.rct.colliderect(rect) and bird.rct.bottom > rect.top:
-                    bird.rct.bottom = rect.top
                     bird.vy = 0
+                    bird.rct.bottom = rect.top
                     bird_hit_stage = True
                     break
             else:  # 重力反転（上向き）
                 if bird.rct.colliderect(rect) and bird.rct.top < rect.bottom:
-                    bird.rct.top = rect.bottom
                     bird.vy = 0
+                    bird.rct.top = rect.bottom
                     bird_hit_stage = True
                     break
 
@@ -390,6 +392,8 @@ def main():
     
     tmr = 0
     while True:
+        if stage.hit_stage(bird):
+            pass #これをするとこうかとんが振動しなくなる
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
@@ -402,9 +406,10 @@ def main():
             if event.type == pg.KEYDOWN and event.key == pg.K_g:
                 gravity_manager.reverse_gravity(bird)
                 bird.g_switch = not bird.g_switch
-            if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
-                isgravity = 1 - isgravity
-                screen.blit(bg_img, [0, 0])
+            # if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
+            #     isgravity = 1 - isgravity
+        screen.blit(bg_img, [0, 0])
+        stage.draw(screen)
 
         # if stage.hit_stage(bird):
         #     pass #これをするとこうかとんが振動しなくなる
