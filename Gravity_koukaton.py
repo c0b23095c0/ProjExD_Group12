@@ -457,14 +457,20 @@ def main():
     explosions = []
 
     #とげのリストを初期化（位置を指定する）
-    thorn_upper_positions = [(400, 600), (400, 500), (400, 400), (400, 300)]  # 上向きのとげの位置をリストに格納
-    thorns_upper = [Thorn(pos, Thorn.img_upper) for pos in thorn_upper_positions]  # 位置を指定して上向きのとげを生成
-    thorn_right_positions = [(500, 600), (500, 500), (500, 400), (500, 300)]  # 右向きのとげの位置をリストに格納
+    thorn_upper_positions = []
+    thorn_under_positions = []
+    for i in range(60):
+        thorn_upper_position = (i*20+10, 630)
+        thorn_upper_positions.append(thorn_upper_position)
+        thorn_under_position = (i*20+10, 20)
+        thorn_under_positions.append(thorn_under_position)  # 上向きのとげの位置をリストに格納  # 位置を指定して上向きのとげを生成
+    thorns_upper = [Thorn(pos, Thorn.img_upper) for pos in thorn_upper_positions]
+    thorns_under = [Thorn(pos, Thorn.img_under) for pos in thorn_under_positions]
+    thorn_right_positions = []  # 右向きのとげの位置をリストに格納
     thorns_right = [Thorn(pos, Thorn.img_right) for pos in thorn_right_positions]  # 位置を指定して右向きのとげを生成
-    thorn_under_positions = [(600, 600), (600, 500), (600, 400), (600, 300)]  # 下向きのとげの位置をリストに格納
-    thorns_under = [Thorn(pos, Thorn.img_under) for pos in thorn_under_positions]  # 位置を指定して下向きのとげを生成
-    thorn_left_positions = [(700, 600), (700, 500), (700, 400), (700, 300)]  # 左向きのとげの位置をリストに格納
+    thorn_left_positions = []  # 左向きのとげの位置をリストに格納
     thorns_left = [Thorn(pos, Thorn.img_left) for pos in thorn_left_positions]  # 位置を指定して左向きのとげを生成
+
               
     clock = pg.time.Clock()
     
