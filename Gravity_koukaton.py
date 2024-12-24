@@ -199,8 +199,47 @@ class Stege:
             (1020, 450),  # ステージ2のドアの座標
             (1000, 100)   # ステージ3のドアの座標
         ]
+        self.apple_positions = [
+            [Enemy(400, 15, 2),
+        Enemy(400, 138, 2),
+        Enemy(400, 266, 2),
+        Enemy(400, 394, 2),
+        Enemy(400, 522, 2)],
+
+            [Enemy(700, 15, -1),
+        Enemy(700, 138, -1),
+        Enemy(700, 266, -1),
+        Enemy(700, 394, -1),
+        Enemy(700, 522, -1)],
+
+        [Enemy(1050, 15, -2),
+        Enemy(1050, 138, -2),
+        Enemy(1050, 266, -2),
+        Enemy(1050, 394, -2),
+        Enemy(1050, 522, -2)],
+        
+            [Enemy(700, 15, -2),
+        Enemy(700, 138, -2),
+        Enemy(700, 266, -2),
+        Enemy(700, 394, -2),
+        Enemy(700, 522, -2)],
+
+        [Enemy(300, 15, 1),
+        Enemy(300, 138, 1),
+        Enemy(300, 266, 1),
+        Enemy(300, 394, 1),
+        Enemy(300, 522, 1)],
+        
+            [Enemy(1000, 15, 2),
+        Enemy(1000, 138, 2),
+        Enemy(1000, 266, 2),
+        Enemy(1000, 394, 2),
+        Enemy(1000, 522, 2)]
+        ]
         self.current_stage_index = 0
         self.image = self.images[self.current_stage_index]
+        self.apple1 = self.apple_positions[self.current_stage_index]
+        self.apple2 = self.apple_positions[self.current_stage_index+3]
         self.display_stage_message = False  # ステージ切り替え時の表示フラグ
         self.message_timer = 0  # ステージ切り替えメッセージの表示時間
         self.door_image = pg.image.load("fig/wooden-door.png")  # ドアの画像をロード
@@ -228,6 +267,8 @@ class Stege:
             font = pg.font.Font(None, 50)
             text = font.render(f"stage {self.current_stage_index + 1}", True, (0, 0, 0))
             text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            self.apple1 = self.apple_positions[self.current_stage_index]
+            self.apple2 = self.apple_positions[self.current_stage_index+3]
             screen.blit(text, text_rect)
             self.message_timer += 1
             if self.message_timer > 100:  
@@ -236,7 +277,7 @@ class Stege:
         #ゴール処理
         if self.goal:
             font = pg.font.Font(None, 100)
-            text = font.render("Goal", True, (0,0,0))
+            text = font.render("Game Clear!", True, (0,0,0))
             text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
             screen.blit(text, text_rect)
         
@@ -368,22 +409,22 @@ def main():
     bird = Bird((300, 200), gravity_manager)
     stage = Stege()
     stage.setup_door(bird)
-    cringo = ClearObj(WIDTH, HEIGHT)
+    #cringo = ClearObj(WIDTH, HEIGHT)
     isgravity = 0
-    enemies1 = [
-        Enemy(400, 15, 2),
-        Enemy(400, 138, 2),
-        Enemy(400, 266, 2),
-        Enemy(400, 394, 2),
-        Enemy(400, 522, 2)
-    ]
-    enemies2 = [
-        Enemy(700, 15, -2),
-        Enemy(700, 138, -2),
-        Enemy(700, 266, -2),
-        Enemy(700, 394, -2),
-        Enemy(700, 522, -2)
-    ]
+    # enemies1 = [
+    #     Enemy(400, 15, 2),
+    #     Enemy(400, 138, 2),
+    #     Enemy(400, 266, 2),
+    #     Enemy(400, 394, 2),
+    #     Enemy(400, 522, 2)
+    # ]
+    # enemies2 = [
+    #     Enemy(700, 15, -2),
+    #     Enemy(700, 138, -2),
+    #     Enemy(700, 266, -2),
+    #     Enemy(700, 394, -2),
+    #     Enemy(700, 522, -2)
+    # ]
 
     #explosionリスト初期化
     explosions = []
@@ -410,6 +451,8 @@ def main():
             #     isgravity = 1 - isgravity
         screen.blit(bg_img, [0, 0])
         stage.draw(screen)
+        enemies1 = stage.apple1
+        enemies2 = stage.apple2
 
         # if stage.hit_stage(bird):
         #     pass #これをするとこうかとんが振動しなくなる
@@ -443,16 +486,16 @@ def main():
                 time.sleep(1)
                 return
             
-        if bird.rct.colliderect(cringo.rct):
-                bird.change_img(6, screen)
-                pg.display.update()
-                time.sleep(1)
-                return
+        # if bird.rct.colliderect(cringo.rct):
+        #         bird.change_img(6, screen)
+        #         pg.display.update()
+        #         time.sleep(1)
+        #         return
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         #enemy1.update(screen)
-        cringo.update(screen)
+        #cringo.update(screen)
         
         for enemy in enemies1:
             enemy.update(screen)
