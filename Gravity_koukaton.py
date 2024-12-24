@@ -30,7 +30,7 @@ class Gravity:
     """
     重力とジャンプを管理するクラス
     """
-    def __init__(self, gravity: float = 0.5, jump_power: float = -20):
+    def __init__(self, gravity: float = 0.5, jump_power: float = -10):
         """
         初期化
         引数:gravity: 下方向の加速度
@@ -251,14 +251,14 @@ class Stege:
         for rect in self.image:
             if bird.g_switch == False:  # 通常の重力（下向き）
                 if bird.rct.colliderect(rect) and bird.rct.bottom > rect.top:
-                    bird.vy = 0
                     bird.rct.bottom = rect.top
+                    bird.vy = 0
                     bird_hit_stage = True
                     break
             else:  # 重力反転（上向き）
                 if bird.rct.colliderect(rect) and bird.rct.top < rect.bottom:
-                    bird.vy = 0
                     bird.rct.top = rect.bottom
+                    bird.vy = 0
                     bird_hit_stage = True
                     break
 
