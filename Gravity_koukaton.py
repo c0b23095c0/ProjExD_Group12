@@ -30,7 +30,7 @@ class Gravity:
     """
     重力とジャンプを管理するクラス
     """
-    def __init__(self, gravity: float = 0.5, jump_power: float = -10):
+    def __init__(self, gravity: float = 0.5, jump_power: float = -20):
         """
         初期化
         引数:gravity: 下方向の加速度
@@ -326,7 +326,7 @@ class Enemy:
         りんごの読み込みと初期速度
         """
         self.vy = speed
-        self.img = pg.transform.rotozoom(pg.image.load(f"ringo.png"), 0, 0.05)
+        self.img = pg.transform.rotozoom(pg.image.load(f"fig/ringo.png"), 0, 0.05)
         self.rct = self.img.get_rect()
         self.rct.center = (x, y)
         self.rct.top = y
@@ -348,7 +348,7 @@ class Enemy:
 
 class ClearObj:
     def __init__(self, x:int, y:int):
-        self.img = pg.transform.rotozoom(pg.image.load(f"glayringo.png"), 0, 0.1)
+        self.img = pg.transform.rotozoom(pg.image.load(f"fig/glayringo.png"), 0, 0.1)
         self.rct = self.img.get_rect()
         self.rct.right = x
         self.rct.bottom = y
@@ -376,11 +376,11 @@ def main():
         Enemy(400, 522, 2)
     ]
     enemies2 = [
-        Enemy(700, 15, -4),
-        Enemy(700, 138, -4),
-        Enemy(700, 266, -4),
-        Enemy(700, 394, -4),
-        Enemy(700, 522, -4)
+        Enemy(700, 15, -2),
+        Enemy(700, 138, -2),
+        Enemy(700, 266, -2),
+        Enemy(700, 394, -2),
+        Enemy(700, 522, -2)
     ]
 
     #explosionリスト初期化
@@ -395,8 +395,9 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 #ジャンプの処理
-                if bird.rct.bottom >= HEIGHT or bird.rct.top <= 0:  # 地面にいるときだけジャンプ
-                    bird.vy = gravity_manager.jump()
+
+                if bird.gravity_maneger.flag == False:  # 地面にいるときだけジャンプ
+                    bird.vy = bird.gravity_maneger.jump()
                     bird.gravity_maneger.flag = True
             if event.type == pg.KEYDOWN and event.key == pg.K_g:
                 gravity_manager.reverse_gravity(bird)
