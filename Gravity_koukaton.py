@@ -38,8 +38,6 @@ class Gravity:
         """
         self.gravity = gravity
         self.jump_power = jump_power
-        self.flag = True
-
 
     def apply_gravity(self, vy: float) -> float:
         """
@@ -47,18 +45,22 @@ class Gravity:
         引数:vy:現在の縦方向速度
         戻り値:縦方向の速度
         """
-        if self.flag:
-            gra = vy + self.gravity
-        else:
-            gra = vy
-        return gra 
+        return vy + self.gravity
 
-    def jump(self):
+    def jump(self) -> float:
         """
         ジャンプ時の速度を返す
         戻り値:ジャンプの初速度
         """
         return self.jump_power
+    
+    def reverse_gravity(self, bird):
+        """
+        重力を反転させる
+        """
+        self.gravity = -self.gravity
+        self.jump_power = -1 * self.jump_power
+        bird.flip_v()
 
 
 class Bird:
@@ -88,6 +90,8 @@ class Bird:
         self.dire = (+3, 0)
         self.vy = 0
         self.gravity_maneger = gravity_manager
+        self.reversing = False
+        self.g_switch =False
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -96,6 +100,7 @@ class Bird:
         引数2 screen：画面Surface
         """
         self.img = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 0.9)
+
         screen.blit(self.img, self.rct)
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
@@ -117,17 +122,38 @@ class Bird:
         self.vy = self.gravity_maneger.apply_gravity(self.vy)
         self.rct.centery += self.vy
 
-        # 地面判定
-        if self.rct.bottom >= HEIGHT:
-            self.rct.bottom = HEIGHT
-            self.vy = 0
+        # 地面・天井判定
+        if self.gravity_maneger.gravity > 0:
+            # 地面判定
+            if self.rct.bottom >= HEIGHT:
+                self.rct.bottom = HEIGHT
+                self.vy = 0
+               
+        # 天井判定
+        else:
+            if self.rct.top <= 0:
+                self.rct.top = 0
+                self.vy = 0 
 
         # 横方向の向きを更新
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.img = __class__.imgs[tuple(sum_mv)]
-            self.dire = sum_mv
+            if  self.g_switch:
+                self.img = pg.transform.flip(self.img, False, True)
 
+            self.dire = sum_mv
+        
+        if self.reversing:
+            self.img = pg.transform.flip(self.img, False, True)
+            self.flip_v()
         screen.blit(self.img, self.rct)
+    
+    def flip_v(self):
+        """
+        こうかとん描写の上下反転
+        """
+        self.reversing = not self.reversing
+
 
 class Stege:
     """
@@ -265,30 +291,30 @@ class Stege:
                 bird.rct.center = (30, 540)  # Birdを初期位置に戻す
         else:
             self.door_rect = None  # ドアがない場合
-class Explosion:
-    """
-    爆発に関するクラス
-    """
-    def __init__(self, bomb:"Bomb"):
-        """
-        爆弾の位置に爆発のgifを描画する
-        引数：爆弾のクラス
-        """
-        self.life = 100
-        self.img = pg.image.load(f"fig/explosion.gif")
-        self.img_rct = self.img.get_rect()
-        self.img_rct.center = bomb.rct.center
+# class Explosion:
+#     """
+#     爆発に関するクラス
+#     """
+#     def __init__(self, bomb:"Bomb"):
+#         """
+#         爆弾の位置に爆発のgifを描画する
+#         引数：爆弾のクラス
+#         """
+#         self.life = 100
+#         self.img = pg.image.load(f"fig/explosion.gif")
+#         self.img_rct = self.img.get_rect()
+#         self.img_rct.center = bomb.rct.center
 
-    def update(self, screen: pg.Surface):
-        """
-        爆発をlifeの時間分画像を反転させながら描画する
-        引数 screen:画面のSurface
-        """
-        self.life -= 1
-        if self.life > 0:
-            if self.life % 2 == 0:
-                self.img = pg.transform.flip(self.img, -1, -1)
-            screen.blit(self.img, self.img_rct)
+#     def update(self, screen: pg.Surface):
+#         """
+#         爆発をlifeの時間分画像を反転させながら描画する
+#         引数 screen:画面のSurface
+#         """
+#         self.life -= 1
+#         if self.life > 0:
+#             if self.life % 2 == 0:
+#                 self.img = pg.transform.flip(self.img, -1, -1)
+#             screen.blit(self.img, self.img_rct)
 
 
 class Enemy:
@@ -335,9 +361,9 @@ def main():
     pg.display.set_caption("グラビティだよ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
-    
+
     gravity_manager = Gravity()
-    bird = Bird((100,450), gravity_manager)
+    bird = Bird((300, 200), gravity_manager)
     stage = Stege()
     stage.setup_door(bird)
     cringo = ClearObj(WIDTH, HEIGHT)
@@ -364,18 +390,24 @@ def main():
     
     tmr = 0
     while True:
-        stage.hit_stage(bird)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 #ジャンプの処理
+
                 if bird.gravity_maneger.flag == False:  # 地面にいるときだけジャンプ
                     bird.vy = bird.gravity_maneger.jump()
                     bird.gravity_maneger.flag = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_g:
+                gravity_manager.reverse_gravity(bird)
+                bird.g_switch = not bird.g_switch
+            if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
+                isgravity = 1 - isgravity
+                screen.blit(bg_img, [0, 0])
 
-        if stage.hit_stage(bird):
-            pass #これをするとこうかとんが振動しなくなる
+        # if stage.hit_stage(bird):
+        #     pass #これをするとこうかとんが振動しなくなる
         #goal処理
         if stage.goal:
             screen.fill((255, 255, 255))
@@ -386,12 +418,8 @@ def main():
             pg.display.update()  # ゴールメッセージを画面に反映
             pg.time.wait(2000)  # 「Goal」を2秒間表示
             return  # ゲーム終了
-        
-
-            if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
-                isgravity = 1 - isgravity
-        screen.blit(bg_img, [0, 0])
-        stage.draw(screen)
+                
+            
             
 
         for enemy in enemies1:
