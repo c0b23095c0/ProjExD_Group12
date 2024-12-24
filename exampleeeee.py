@@ -8,7 +8,7 @@ import pygame as pg
 
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
-NUM_OF_FIRES = 5 # enemyの数
+NUM_OF_BOMBS = 5 # 爆弾の数
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -181,69 +181,13 @@ class Explosion:
             screen.blit(self.img, self.img_rct)
 
 
-class Enemy:
-    """
-    こうかとんをこの世から消し去るためステージに置かれるりんごのクラス
-    """
-    def __init__(self, x:int, y:int, speed):
-        """
-        りんごの読み込みと初期速度
-        """
-        self.vy = speed
-        self.img = pg.transform.rotozoom(pg.image.load(f"ringo.png"), 0, 0.05)
-        self.rct = self.img.get_rect()
-        self.rct.center = (x, y)
-        self.rct.top = y
-        self.x = x
-        self.y = y
-
-    def update(self, screen: pg.Surface):
-        """
-        りんごを速度ベクトルself.vyに基づき移動させる
-        引数 screen：画面Surface
-        """
-        if self.rct.bottom >= HEIGHT:
-            self.rct.top = 10
-        if self.rct.top <= 0:
-            self.rct.bottom = 640
-        self.rct.move_ip(0, self.vy)
-        screen.blit(self.img, self.rct)
-        
-
-class ClearObj:
-    def __init__(self, x:int, y:int):
-        self.img = pg.transform.rotozoom(pg.image.load(f"glayringo.png"), 0, 0.1)
-        self.rct = self.img.get_rect()
-        self.rct.right = x
-        self.rct.bottom = y
-        
-    def update(self, screen: pg.Surface):
-        screen.blit(self.img, self.rct)
-
-
 def main():
-    pg.display.set_caption("グラビティだよ！こうかとん")
+    pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
 
     gravity_manager = Gravity()
     bird = Bird((300, 200), gravity_manager)
-    cringo = ClearObj(WIDTH, HEIGHT)
-    isgravity = 0
-    enemies1 = [
-        Enemy(400, 15, 2),
-        Enemy(400, 138, 2),
-        Enemy(400, 266, 2),
-        Enemy(400, 394, 2),
-        Enemy(400, 522, 2)
-    ]
-    enemies2 = [
-        Enemy(700, 15, -4),
-        Enemy(700, 138, -4),
-        Enemy(700, 266, -4),
-        Enemy(700, 394, -4),
-        Enemy(700, 522, -4)
-    ]
 
     #explosionリスト初期化
     explosions = []
@@ -263,44 +207,11 @@ def main():
             if event.type == pg.KEYDOWN and event.key == pg.K_g:
                 gravity_manager.reverse_gravity(bird)
                 bird.g_switch = not bird.g_switch
-            if event.type == pg.KEYDOWN and event.key == pg.K_g and isgravity == 1:
-                isgravity = 1 - isgravity
         screen.blit(bg_img, [0, 0])
             
-
-        for enemy in enemies1:
-            if bird.rct.colliderect(enemy.rct):
-                # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
-                bird.change_img(8, screen)
-                pg.display.update()
-                time.sleep(1)
-                return
-            
-        for enemy in enemies2:
-            if bird.rct.colliderect(enemy.rct):
-                # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
-                bird.change_img(8, screen)
-                pg.display.update()
-                time.sleep(1)
-                return
-            
-        if bird.rct.colliderect(cringo.rct):
-                bird.change_img(6, screen)
-                pg.display.update()
-                time.sleep(1)
-                return
-
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        #enemy1.update(screen)
-        cringo.update(screen)
         
-        for enemy in enemies1:
-            enemy.update(screen)
-        for enemy in enemies2:
-            enemy.update(screen)
-
-
         explosions = [explosion for explosion in explosions if explosion.life > 0]
         for explosion in explosions:
             explosion.update(screen)
