@@ -152,7 +152,7 @@ class Explosion:
 
 class Enemy:
     """
-    こうかとんをこの世から消し去るためステージに置かれるギミックのクラス
+    こうかとんをこの世から消し去るためステージに置かれるりんごのクラス
     """
     def __init__(self, x:int, y:int, speed):
         """
