@@ -346,7 +346,12 @@ class Enemy:
             self.rct.bottom = 640
         self.rct.move_ip(0, self.vy)
         screen.blit(self.img, self.rct)
-        
+        # self.life -= 1
+        # if self.life > 0:
+        #     if self.life % 2 == 0:
+        #         self.img = pg.transform.flip(self.img, -1, -1)
+        #     screen.blit(self.img, self.img_rct)
+
 
 class ClearObj:
     def __init__(self, x:int, y:int):
@@ -355,9 +360,31 @@ class ClearObj:
         self.rct.right = x
         self.rct.bottom = y
         
-    def update(self, screen: pg.Surface):
-        screen.blit(self.img, self.rct)
 
+class Thorn:
+    """
+    とげに関するクラス
+    """
+    img_upper = pg.transform.rotozoom(pg.image.load("fig/thorn.png"), 0, 0.5)     # 上向きのとげ画像
+    img_left = pg.transform.rotozoom(pg.image.load("fig/thorn.png"), -90, 0.5)    # 左向きのとげ画像
+    img_under = pg.transform.rotozoom(pg.image.load("fig/thorn.png"), -180, 0.5)  # 下向きのとげ画像
+    img_right = pg.transform.rotozoom(pg.image.load("fig/thorn.png"), -270, 0.5)  # 右向きのとげ画像
+
+    def __init__(self, xy: tuple[int, int], img: pg.Surface):
+        """
+        とげを初期化する
+        引数 xy: とげの表示位置
+        """
+        self.img = img
+        self.rct = self.img.get_rect()
+        self.rct.center = xy
+
+    def update(self, screen: pg.Surface):
+        """
+        とげを画面に表示する
+        引数 screen: 画面Surface
+        """
+        screen.blit(self.img, self.rct)
 
 def main():
     pg.display.set_caption("グラビティだよ！こうかとん")
@@ -388,6 +415,16 @@ def main():
     #explosionリスト初期化
     explosions = []
 
+    #とげのリストを初期化（位置を指定する）
+    thorn_upper_positions = [(400, 600), (400, 500), (400, 400), (400, 300)]  # 上向きのとげの位置をリストに格納
+    thorns_upper = [Thorn(pos, Thorn.img_upper) for pos in thorn_upper_positions]  # 位置を指定して上向きのとげを生成
+    thorn_right_positions = [(500, 600), (500, 500), (500, 400), (500, 300)]  # 右向きのとげの位置をリストに格納
+    thorns_right = [Thorn(pos, Thorn.img_right) for pos in thorn_right_positions]  # 位置を指定して右向きのとげを生成
+    thorn_under_positions = [(600, 600), (600, 500), (600, 400), (600, 300)]  # 下向きのとげの位置をリストに格納
+    thorns_under = [Thorn(pos, Thorn.img_under) for pos in thorn_under_positions]  # 位置を指定して下向きのとげを生成
+    thorn_left_positions = [(700, 600), (700, 500), (700, 400), (700, 300)]  # 左向きのとげの位置をリストに格納
+    thorns_left = [Thorn(pos, Thorn.img_left) for pos in thorn_left_positions]  # 位置を指定して左向きのとげを生成
+              
     clock = pg.time.Clock()
     
     tmr = 0
@@ -451,6 +488,11 @@ def main():
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
+        for thorn in thorns_upper + thorns_right + thorns_under + thorns_left:
+            thorn.update(screen)
+            if bird.rct.colliderect(thorn.rct):  #とげにぶつかったら
+                return  # ゲーム終了
+
         #enemy1.update(screen)
         cringo.update(screen)
         
